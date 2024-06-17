@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, Element, scroller } from 'react-scroll';
 
+
 const MenuPage = () => {
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOption, setFilterOption] = useState('none');
+  const [order, setOrder] = useState({});
 
   const categories = [
     { name: 'Burger', icon: '🍔' },
@@ -39,6 +41,7 @@ const MenuPage = () => {
     // Add more offers as needed
   ];
 
+  //scroll functionality
   const scrollToCategory = (category) => {
     scroller.scrollTo(category, {
       duration: 800,
@@ -55,6 +58,7 @@ const MenuPage = () => {
     setCurrentOfferIndex((currentOfferIndex - 1 + offers.length) % offers.length);
   };
 
+  //for searching
   const filteredFoodItems = Object.keys(foodItems).reduce((filteredItems, category) => {
     const filteredCategoryItems = foodItems[category].filter((foodItem) => {
       const itemNameLowercase = foodItem.name.toLowerCase();
@@ -73,6 +77,7 @@ const MenuPage = () => {
     };
   }, {});
 
+  //for filtering/sorting(not functional yet)
   const sortedFoodItems = Object.keys(filteredFoodItems).reduce((sortedItems, category) => {
     const sortedCategoryItems = filteredFoodItems[category].sort((a, b) => {
       if (filterOption === 'price-low-to-high') {
@@ -90,6 +95,63 @@ const MenuPage = () => {
     };
   }, {});
 
+  //adding and removing from order functionality
+  const addToOrder = (category, item) => {
+    setOrder(prevOrder => {
+      const categoryOrder = prevOrder[category] || [];
+      const itemIndex = categoryOrder.findIndex(i => i.name === item.name);
+  
+      if (itemIndex === -1) {
+        return {
+          ...prevOrder,
+          [category]: [...categoryOrder, { ...item, quantity: 1 }],
+        };
+      } else {
+        const updatedItem = { ...categoryOrder[itemIndex], quantity: categoryOrder[itemIndex].quantity + 1 };
+        return {
+          ...prevOrder,
+          [category]: [
+            ...categoryOrder.slice(0, itemIndex),
+            updatedItem,
+            ...categoryOrder.slice(itemIndex + 1),
+          ],
+        };
+      }
+    });
+  };
+
+  const removeFromOrder = (category, item) => {
+    setOrder(prevOrder => {
+      const categoryOrder = prevOrder[category] || [];
+      const itemIndex = categoryOrder.findIndex(i => i.name === item.name);
+  
+      if (itemIndex !== -1) {
+        const updatedItem = { ...categoryOrder[itemIndex], quantity: categoryOrder[itemIndex].quantity - 1 };
+  
+        if (updatedItem.quantity > 0) {
+          return {
+            ...prevOrder,
+            [category]: [
+              ...categoryOrder.slice(0, itemIndex),
+              updatedItem,
+              ...categoryOrder.slice(itemIndex + 1),
+            ],
+          };
+        } else {
+          return {
+            ...prevOrder,
+            [category]: [
+              ...categoryOrder.slice(0, itemIndex),
+              ...categoryOrder.slice(itemIndex + 1),
+            ],
+          };
+        }
+      }
+  
+      return prevOrder;
+    });
+  };
+
   return (
     <div className="p-5">
       <header className="text-center mb-5">
@@ -99,7 +161,7 @@ const MenuPage = () => {
 
       {/*special offers*/}
       <section className="relative mb-5">
-        <div className="bg-red-400 p-4 rounded-lg text-center mx-4 my-4 min-h-40">
+        <div className="bg-red-400 p-4 rounded-lg text-center mx-4 my-4 min-h-40 ">
           <h2 className="text-xl text-left text-white ">{offers[currentOfferIndex].title}</h2>
           <h1 className="text-2xl text-left text-white font-semibold max-w-30">{offers[currentOfferIndex].description}</h1>
           <h1 className="text-4xl text-white font-semibold mt-3">{offers[currentOfferIndex].offer}</h1>
@@ -111,20 +173,32 @@ const MenuPage = () => {
           <button onClick={nextOffer} className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full ">❯</button>
         )}
       </section>
-      <section>
-      <div className="flex items-center mb-4 ">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="p-2 border border-black w-64 bg-gray-300"
-            placeholder="Search"
-          />
-        </div>
-        {searchQuery!=='' && Object.keys(sortedFoodItems).map(category => (
+      {/*search bar*/}
+      <section className="flex justify-center mb-2">
+          <form action="/search" className="max-w-[480px] w-full px-4">
+            <div className="relative">
+              <input
+                type="text"
+                name="q"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border h-12 shadow p-4 rounded-lg dark:text-gray-800 dark:border-gray-700 dark:bg-gray-200"
+                placeholder="search"
+              />
+              <button type="submit">
+                <svg className="text-teal-400 h-5 w-5 absolute top-3.5 right-3 fill-current dark:text-teal-300" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 56.966 56.966" style={{enableBackground:"new 0 0 56.966 56.966"}} xmlSpace="preserve">
+                  <path d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z">
+                  </path>
+                </svg>
+              </button>
+            </div>
+          </form>
+      </section>
+      {searchQuery!=='' && Object.keys(filteredFoodItems).map(category => (
+        filteredFoodItems[category].length > 0 && (
           <Element key={category} name={category} className="mb-5">
             <h2 className="text-xl font-bold mb-3">{category}</h2>
-            {sortedFoodItems[category].map(item => (
+            {filteredFoodItems[category].map(item => (
               <div key={item.name} className="p-4 border-b border-gray-300">
                 <h3 className="text-lg font-semibold">{item.name}</h3>
                 <p>{item.description}</p>
@@ -132,9 +206,9 @@ const MenuPage = () => {
               </div>
             ))}
           </Element>
-        ))}
-      </section>
-
+        )
+      ))}
+        {/*category divs*/}
       <section className="flex flex-wrap justify-around mb-5">
         {categories.map(category => (
           <div
@@ -147,16 +221,37 @@ const MenuPage = () => {
           </div>
         ))}
       </section>
-
+      {/*food items*/}
       <section>
         {searchQuery==='' && Object.keys(foodItems).map(category => (
           <Element key={category} name={category} className="mb-5">
             <h2 className="text-xl font-bold mb-3">{category}</h2>
             {foodItems[category].map(item => (
-              <div key={item.name} className="p-4 border-b border-gray-300">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
-                <p>{item.description}</p>
-                <p className="font-bold">{item.price}</p>
+              <div key={item.name} className="p-4 border-b border-gray-300 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold">{item.name}</h3>
+                  <p>{item.description}</p>
+                  <p className="font-bold">{item.price}</p>
+                </div>
+                <div className="flex items-center">
+                  {order[category] && order[category].some(i => i.name === item.name) ? (
+                    <button
+                      className="text-red-500"
+                      onClick={() => removeFromOrder(category, item)}
+                    >
+                      <span className="mr-1">-</span>
+                      <span>{order[category].find(i => i.name === item.name).quantity}</span>
+                      <span className="ml-1">+</span>
+                    </button>
+                  ) : (
+                    <button
+                      className="text-green-500"
+                      onClick={() => addToOrder(category, item)}
+                    >
+                      <span>+</span>
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </Element>
