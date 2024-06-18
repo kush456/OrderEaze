@@ -100,14 +100,15 @@ const MenuPage = () => {
     setOrder(prevOrder => {
       const categoryOrder = prevOrder[category] || [];
       const itemIndex = categoryOrder.findIndex(i => i.name === item.name);
-  
+      //console.log(itemIndex);
       if (itemIndex === -1) {
         return {
-          ...prevOrder,
+          ...prevOrder,//array of objects category, each category is an object again containing a property quantity.
           [category]: [...categoryOrder, { ...item, quantity: 1 }],
         };
       } else {
         const updatedItem = { ...categoryOrder[itemIndex], quantity: categoryOrder[itemIndex].quantity + 1 };
+        console.log("value increased");
         return {
           ...prevOrder,
           [category]: [
@@ -124,7 +125,7 @@ const MenuPage = () => {
     setOrder(prevOrder => {
       const categoryOrder = prevOrder[category] || [];
       const itemIndex = categoryOrder.findIndex(i => i.name === item.name);
-  
+      //console.log("remove called");
       if (itemIndex !== -1) {
         const updatedItem = { ...categoryOrder[itemIndex], quantity: categoryOrder[itemIndex].quantity - 1 };
   
@@ -234,15 +235,23 @@ const MenuPage = () => {
                   <p className="font-bold">{item.price}</p>
                 </div>
                 <div className="flex items-center">
+                {/*conditional rendering for adding orders or removing them*/}
                   {order[category] && order[category].some(i => i.name === item.name) ? (
-                    <button
-                      className="text-red-500"
-                      onClick={() => removeFromOrder(category, item)}
-                    >
-                      <span className="mr-1">-</span>
+                    <>
+                      <button
+                        className="text-red-500"
+                        onClick={() => removeFromOrder(category, item)}
+                      >
+                        <span className="mr-3">-</span>
+                      </button>
                       <span>{order[category].find(i => i.name === item.name).quantity}</span>
-                      <span className="ml-1">+</span>
-                    </button>
+                      <button
+                        className="text-green-500"
+                        onClick={() => addToOrder(category, item)}
+                      >
+                        <span className='ml-3'>+</span>
+                      </button>
+                    </>
                   ) : (
                     <button
                       className="text-green-500"
