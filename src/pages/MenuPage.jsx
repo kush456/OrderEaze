@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, Element, scroller } from 'react-scroll';
 
-
 const MenuPage = () => {
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOption, setFilterOption] = useState('none');
   const [order, setOrder] = useState({});
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const categories = [
     { name: 'Burger', icon: '🍔' },
@@ -19,7 +19,7 @@ const MenuPage = () => {
     { name: 'Noodles', icon: '🍜' },
     { name: 'Sandwich', icon: '🥪' },
     { name: 'Pasta', icon: '🍝' },
-    { name: 'Ice Cream', icon: '🍨' },
+    { name: 'IceCream', icon: '🍨' },
   ];
 
   const foodItems = {
@@ -31,16 +31,82 @@ const MenuPage = () => {
       { name: 'Chicken Taco', description: 'Spicy chicken taco', price: '$3.99' },
       { name: 'Beef Taco', description: 'Savory beef taco', price: '$4.49' },
     ],
-    // Add more categories and items as needed
+    Burrito: [
+      { name: 'Bean Burrito', description: 'A hearty bean burrito', price: '$6.99' },
+      { name: 'Chicken Burrito', description: 'A flavorful chicken burrito', price: '$7.99' },
+    ],
+    Drink: [
+      { name: 'Coca Cola', description: 'Refreshing cola drink', price: '$1.99' },
+      { name: 'Orange Juice', description: 'Freshly squeezed orange juice', price: '$2.49' },
+    ],
+    Pizza: [
+      { name: 'Pepperoni Pizza', description: 'Classic pepperoni pizza', price: '$8.99' },
+      { name: 'Margherita Pizza', description: 'Traditional Margherita pizza', price: '$7.99' },
+    ],
+    Donut: [
+      { name: 'Glazed Donut', description: 'Sweet glazed donut', price: '$1.49' },
+      { name: 'Chocolate Donut', description: 'Rich chocolate donut', price: '$1.99' },
+    ],
+    Salad: [
+      { name: 'Caesar Salad', description: 'Crisp Caesar salad', price: '$5.99' },
+      { name: 'Greek Salad', description: 'Fresh Greek salad', price: '$6.49' },
+    ],
+    Noodles: [
+      { name: 'Spicy Ramen', description: 'Hot and spicy ramen noodles', price: '$7.99' },
+      { name: 'Pad Thai', description: 'Classic Thai noodle dish', price: '$8.99' },
+    ],
+    Sandwich: [
+      { name: 'Turkey Sandwich', description: 'Turkey sandwich with lettuce', price: '$5.99' },
+      { name: 'Ham Sandwich', description: 'Ham sandwich with cheese', price: '$5.49' },
+    ],
+    Pasta: [
+      { name: 'Spaghetti Bolognese', description: 'Pasta with meat sauce', price: '$9.99' },
+      { name: 'Penne Alfredo', description: 'Pasta with creamy Alfredo sauce', price: '$8.99' },
+    ],
+    IceCream: [
+      { name: 'Vanilla Ice Cream', description: 'Creamy vanilla ice cream', price: '$2.99' },
+      { name: 'Chocolate Ice Cream', description: 'Rich chocolate ice cream', price: '$2.99' },
+    ],
   };
 
   const offers = [
-    { title: 'Ice Cream Day', description: 'Get your sweet ice cream', offer: '40% off' },
-    { title: 'Burger Fest', description: 'Big Juicy Burgers', offer: 'Buy 1, Get 1 Free!' },
-    { title: 'Taco Special', description: 'Tasty Tacos', offer: 'Buy 2, Get 1 Free!' },
+    { 
+      title: 'Ice Cream Day', 
+      description: 'Get your sweet ice cream', 
+      offer: '40% off',
+      type: 'discount',
+      discount: 0.4,
+      item: 'IceCream'
+    },
+    { 
+      title: 'Burger Fest', 
+      description: 'Big Juicy Burgers', 
+      offer: 'Buy 1, Get 1 Free!',
+      type: 'buyGetFree',
+      x: 1,
+      y: 1,
+      item: 'Burger'
+    },
+    { 
+      title: 'Taco Special', 
+      description: 'Tasty Tacos', 
+      offer: 'Buy 2, Get 1 Free!',
+      type: 'buyGetFree',
+      x: 2,
+      y: 1,
+      item: 'Taco'
+    },
     // Add more offers as needed
   ];
 
+  //discount formula
+  const calculateDiscountedPrice = (originalPrice, discount) => {
+    const price = parseFloat(originalPrice.slice(1));
+    const discountedPrice = price * (1 - discount);
+    return `$${discountedPrice.toFixed(2)}`;
+  };
+  
+  
   //scroll functionality
   const scrollToCategory = (category) => {
     scroller.scrollTo(category, {
@@ -81,9 +147,9 @@ const MenuPage = () => {
   const sortedFoodItems = Object.keys(filteredFoodItems).reduce((sortedItems, category) => {
     const sortedCategoryItems = filteredFoodItems[category].sort((a, b) => {
       if (filterOption === 'price-low-to-high') {
-        return a.price - b.price;
+        return parseFloat(a.price.slice(1)) - parseFloat(b.price.slice(1));
       } else if (filterOption === 'price-high-to-low') {
-        return b.price - a.price;
+        return parseFloat(b.price.slice(1)) - parseFloat(a.price.slice(1));
       }
 
       return 0;
@@ -117,6 +183,23 @@ const MenuPage = () => {
             ...categoryOrder.slice(itemIndex + 1),
           ],
         };
+      }
+    }, () => {
+      checkBuyGetFreeOffers(); // After updating order, check buy get free offers
+    });
+  };
+
+  const checkBuyGetFreeOffers = () => {
+    offers.forEach(offer => {
+      if (offer.type === 'buyGetFree') {
+        const { x, y, item } = offer;
+        const orderedItems = order[item] || [];
+        const totalOrdered = orderedItems.reduce((acc, curr) => acc + curr.quantity, 0);
+  
+        if (totalOrdered >= x && totalOrdered % x === 0) {
+          // Notify user that they are eligible for free items
+          alert(`Add ${y} more ${item}(s) for free`);
+        }
       }
     });
   };
@@ -153,6 +236,8 @@ const MenuPage = () => {
     });
   };
 
+  const initialCategoriesToShow = 8; // to implement more info less info
+
   return (
     <div className="p-5">
       <header className="text-center mb-5">
@@ -173,7 +258,9 @@ const MenuPage = () => {
         {currentOfferIndex < offers.length - 1 && (
           <button onClick={nextOffer} className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full ">❯</button>
         )}
+        
       </section>
+      
       {/*search bar*/}
       <section className="flex justify-center mb-2">
           <form action="/search" className="max-w-[480px] w-full px-4">
@@ -211,7 +298,7 @@ const MenuPage = () => {
       ))}
         {/*category divs*/}
       <section className="flex flex-wrap justify-around mb-5">
-        {categories.map(category => (
+        {categories.slice(0, showAllCategories ? categories.length : initialCategoriesToShow).map((category, index) => (
           <div
             key={category.name}
             className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
@@ -221,7 +308,58 @@ const MenuPage = () => {
             <p>{category.name}</p>
           </div>
         ))}
+        {/*more info less info*/}
+        {!showAllCategories ? (
+          <div
+            className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
+            onClick={() => setShowAllCategories(true)}
+          >
+            <span className="text-2xl">➕</span>
+            <p>More Info</p>
+          </div>
+        ) : (
+          <div
+            className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
+            onClick={() => setShowAllCategories(false)}
+          >
+            <span className="text-2xl">➖</span>
+            <p>Less Info</p>
+          </div>
+        )}
       </section>
+
+      {/* Special Offers */}
+      <section className="mb-5">
+        <h2 className="text-xl font-bold mb-3">Special Offers</h2>
+        
+        {offers.map((offer, index) => (
+          <div key={index} className="p-4 border-b border-gray-300">
+            <h3 className="text-lg font-semibold">{offer.title}</h3>
+            <p>{offer.description}</p>
+            <p className="font-bold">{offer.offer}</p>
+            {offer.type === 'discount' && (
+              <div>
+                <h4 className="font-bold mt-2">Discounts</h4>
+                {foodItems[offer.item].map(item => (
+                  <div key={item.name} className="flex justify-between items-center">
+                    <div>
+                      <del className="text-gray-500">{item.price}</del>
+                      <p className="font-bold">{calculateDiscountedPrice(item.price, offer.discount)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {offer.type === 'buyGetFree' && (
+              <div>
+                <h4 className="font-bold mt-2">Free Items</h4>
+                <p>Add {offer.y} more {offer.item}(s) for free</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </section>
+
       {/*food items*/}
       <section>
         {searchQuery==='' && Object.keys(foodItems).map(category => (
