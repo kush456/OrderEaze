@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import Basket from '../components/Basket';
 import Profile from '../components/Profile';
 
+
 const MenuPage = () => {
   const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOption, setFilterOption] = useState('none');
-  const [order, setOrder] = useState({});
+  const [order, setOrder] = useState([]);
   const [showAllCategories, setShowAllCategories] = useState(false);
 
   const categories = [
@@ -190,177 +191,180 @@ const MenuPage = () => {
   };
 
   const initialCategoriesToShow = 8; // to implement more info less info
-
+  
   return (
-    <div className="p-5">
-      <header className="text-center mb-5 flex justify-between">
-        <button >
-          <Profile/>
-        </button>
+    
+      <div className="p-5">
+        <header className="text-center mb-5 flex justify-between">
+          <button >
+            <Profile/>
+          </button>
+          <div>
+            <h1 className="text-2xl">Welcome To</h1>
+            <h2 className="text-2xl font-bold text-red-500">Desi Tadka</h2>
+          </div>
+          <Link className="my-5" to={"/mybasket"}>
+            <Basket/>
+          </Link>
+        </header>
+
+        {/* special offers */}
+        <section className="relative mb-5">
+          <div className="bg-red-400 p-4 rounded-lg text-center mx-4 my-4 min-h-40">
+            <h2 className="text-2xl text-white font-bold">{offers[currentOfferIndex].title}</h2>
+            <p className="text-xl text-white mt-2">{offers[currentOfferIndex].description}</p>
+            <p className="text-lg text-white mt-2">{offers[currentOfferIndex].offer}</p>
+          </div>
+          <button
+            onClick={prevOffer}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white rounded-full w-10 h-10"
+          >
+            &lt;
+          </button>
+          <button
+            onClick={nextOffer}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white rounded-full w-10 h-10"
+          >
+            &gt;
+          </button>
+        </section>
+
+        {/* Search bar and Filter dropdown */}
+        {/*size of dropwdowns needs to be fixed*/}
+        <div className="flex justify-center mb-5 space-x-2">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="p-2 border border-gray-300 rounded-md w-3/4"
+          />
+          <select
+            value={filterOption}
+            onChange={(e) => setFilterOption(e.target.value)}
+            className="p-2 border border-gray-300 rounded-md w-1/4 max-w-full"
+          >
+            <option className="max-w-full overflow-hidden" value="none">Sort</option>
+            <option className="max-w-full overflow-hidden" value="price-low-to-high">Price: Low to High</option>
+            <option className="max-w-full overflow-hidden" value="price-high-to-low">Price: High to Low</option>
+          </select>
+        </div>
+
+
+        {/*category divs*/}
+        <section className="flex flex-wrap justify-around mb-5">
+          {categories.slice(0, showAllCategories ? categories.length : initialCategoriesToShow).map((category, index) => (
+            <div
+              key={category.name}
+              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
+              onClick={() => scrollToCategory(category.name)}
+            >
+              <span className="text-2xl">{category.icon}</span>
+              <p>{category.name}</p>
+            </div>
+          ))}
+          {/*more info less info*/}
+          {!showAllCategories ? (
+            <div
+              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
+              onClick={() => setShowAllCategories(true)}
+            >
+              <span className="text-2xl">➕</span>
+              <p>More Info</p>
+            </div>
+          ) : (
+            <div
+              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
+              onClick={() => setShowAllCategories(false)}
+            >
+              <span className="text-2xl">➖</span>
+              <p>Less Info</p>
+            </div>
+          )}
+        </section>
+
+        
+        {/* food items */}
         <div>
-          <h1 className="text-2xl">Welcome To</h1>
-          <h2 className="text-2xl font-bold text-red-500">Desi Tadka</h2>
+          {Object.keys(sortedFoodItems).map(category => (
+            <Element name={category} key={category}>
+              {sortedFoodItems[category].length > 0 && 
+                <h3 className="text-xl font-bold mt-5 mb-3">{category}</h3>
+              }
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedFoodItems[category].map(item => (
+                  <div key={item.name} className="border border-gray-300 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold">{item.name}</h4>
+                    <p className="text-gray-600">{item.description}</p>
+                    <p className="text-gray-800">
+                      {item.special === 'yes' ? (
+                        <>
+                          <span className="line-through mr-2">{item.price}</span>
+                          <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
+                        </>
+                      ) : (
+                        item.price
+                      )}
+                    </p>
+                    <div className='flex justify-end'>
+                      <button
+                        onClick={() => addToOrder(category, item)}
+                        className="mt-2 p-2 bg-green-500 text-white rounded-lg"
+                      >
+                        Add
+                      </button>
+                      <button
+                        onClick={() => removeFromOrder(category, item)}
+                        className="mt-2 p-2 bg-red-500 text-white rounded-lg ml-2"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Element>
+          ))}
         </div>
-        <Link className="my-5" to={"/mybasket"}>
-          <Basket/>
-        </Link>
-      </header>
 
-      {/* special offers */}
-      <section className="relative mb-5">
-        <div className="bg-red-400 p-4 rounded-lg text-center mx-4 my-4 min-h-40">
-          <h2 className="text-2xl text-white font-bold">{offers[currentOfferIndex].title}</h2>
-          <p className="text-xl text-white mt-2">{offers[currentOfferIndex].description}</p>
-          <p className="text-lg text-white mt-2">{offers[currentOfferIndex].offer}</p>
-        </div>
-        <button
-          onClick={prevOffer}
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white rounded-full w-10 h-10"
-        >
-          &lt;
-        </button>
-        <button
-          onClick={nextOffer}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white rounded-full w-10 h-10"
-        >
-          &gt;
-        </button>
-      </section>
-
-      {/* Search bar and Filter dropdown */}
-      {/*size of dropwdowns needs to be fixed*/}
-      <div className="flex justify-center mb-5 space-x-2">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md w-3/4"
-        />
-        <select
-          value={filterOption}
-          onChange={(e) => setFilterOption(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md w-1/4 max-w-full"
-        >
-          <option className="max-w-full overflow-hidden" value="none">Sort</option>
-          <option className="max-w-full overflow-hidden" value="price-low-to-high">Price: Low to High</option>
-          <option className="max-w-full overflow-hidden" value="price-high-to-low">Price: High to Low</option>
-        </select>
-      </div>
-
-
-      {/*category divs*/}
-      <section className="flex flex-wrap justify-around mb-5">
-        {categories.slice(0, showAllCategories ? categories.length : initialCategoriesToShow).map((category, index) => (
-          <div
-            key={category.name}
-            className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-            onClick={() => scrollToCategory(category.name)}
-          >
-            <span className="text-2xl">{category.icon}</span>
-            <p>{category.name}</p>
-          </div>
-        ))}
-        {/*more info less info*/}
-        {!showAllCategories ? (
-          <div
-            className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-            onClick={() => setShowAllCategories(true)}
-          >
-            <span className="text-2xl">➕</span>
-            <p>More Info</p>
-          </div>
-        ) : (
-          <div
-            className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-            onClick={() => setShowAllCategories(false)}
-          >
-            <span className="text-2xl">➖</span>
-            <p>Less Info</p>
-          </div>
-        )}
-      </section>
-
-      
-      {/* food items */}
-      <div>
-        {Object.keys(sortedFoodItems).map(category => (
-          <Element name={category} key={category}>
-            {sortedFoodItems[category].length > 0 && 
-              <h3 className="text-xl font-bold mt-5 mb-3">{category}</h3>
-            }
+        {/* Order Summary */}
+        <div className="mt-5">
+          <h3 className="text-xl font-bold mb-3">Your Order</h3>
+          {Object.keys(order).length === 0 ? (
+            <p>No items in your order.</p>
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedFoodItems[category].map(item => (
-                <div key={item.name} className="border border-gray-300 p-4 rounded-lg">
-                  <h4 className="text-lg font-semibold">{item.name}</h4>
-                  <p className="text-gray-600">{item.description}</p>
-                  <p className="text-gray-800">
-                    {item.special === 'yes' ? (
-                      <>
-                        <span className="line-through mr-2">{item.price}</span>
-                        <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
-                      </>
-                    ) : (
-                      item.price
-                    )}
-                  </p>
-                  <div className='flex justify-end'>
-                    <button
-                      onClick={() => addToOrder(category, item)}
-                      className="mt-2 p-2 bg-green-500 text-white rounded-lg"
-                    >
-                      Add
-                    </button>
+              {Object.keys(order).map(category => (
+                order[category].map(item => (
+                  <div key={item.name} className="border border-gray-300 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold">{item.name}</h4>
+                    <p className="text-gray-600">{item.description}</p>
+                    <p className="text-gray-800">
+                      {item.special === 'yes' ? (
+                        <>
+                          <span className="line-through mr-2">{item.price}</span>
+                          <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
+                        </>
+                      ) : (
+                        item.price
+                      )}
+                    </p>
+                    <p className="text-gray-800">Quantity: {item.quantity}</p>
                     <button
                       onClick={() => removeFromOrder(category, item)}
-                      className="mt-2 p-2 bg-red-500 text-white rounded-lg ml-2"
+                      className="mt-2 p-2 bg-red-500 text-white rounded-lg"
                     >
                       Remove
                     </button>
+                    {console.log(order)}
                   </div>
-                </div>
+                ))
               ))}
             </div>
-          </Element>
-        ))}
+          )}
+        </div>
       </div>
-
-      {/* Order Summary */}
-      <div className="mt-5">
-        <h3 className="text-xl font-bold mb-3">Your Order</h3>
-        {Object.keys(order).length === 0 ? (
-          <p>No items in your order.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.keys(order).map(category => (
-              order[category].map(item => (
-                <div key={item.name} className="border border-gray-300 p-4 rounded-lg">
-                  <h4 className="text-lg font-semibold">{item.name}</h4>
-                  <p className="text-gray-600">{item.description}</p>
-                  <p className="text-gray-800">
-                    {item.special === 'yes' ? (
-                      <>
-                        <span className="line-through mr-2">{item.price}</span>
-                        <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
-                      </>
-                    ) : (
-                      item.price
-                    )}
-                  </p>
-                  <p className="text-gray-800">Quantity: {item.quantity}</p>
-                  <button
-                    onClick={() => removeFromOrder(category, item)}
-                    className="mt-2 p-2 bg-red-500 text-white rounded-lg"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    
   );
 };
 
