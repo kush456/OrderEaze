@@ -17,7 +17,7 @@ const MenuPage = () => {
   //Load order 
   useEffect(() => {
     const savedOrder = localStorage.getItem('order');
-    console.log(savedOrder);
+    console.log('savedOrder',savedOrder);
     if (savedOrder) {
       setOrder(JSON.parse(savedOrder));
     }
@@ -28,7 +28,7 @@ const MenuPage = () => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
     } else {
-      console.log("was run");
+      //console.log("was run");
       localStorage.setItem('order', JSON.stringify(order));
     }
   }, [order]);
@@ -37,55 +37,55 @@ const MenuPage = () => {
 
   const foodItems = {
     Burger: [
-      { name: 'Cheeseburger', description: 'A delicious cheeseburger', price: '$5.99', special: 'no' },
-      { name: 'Veggie Burger', description: 'A tasty veggie burger', price: '$4.99', special: 'no' },
+      { name: 'Cheeseburger', description: 'A delicious cheeseburger', price: '$5.99', special: 'yes' , category : "Burger"},
+      { name: 'Veggie Burger', description: 'A tasty veggie burger', price: '$4.99', special: 'yes', category : "Burger" },
     ],
     Taco: [
-      { name: 'Chicken Taco', description: 'Spicy chicken taco', price: '$3.99', special: 'no' },
-      { name: 'Beef Taco', description: 'Savory beef taco', price: '$4.49', special: 'no' },
+      { name: 'Chicken Taco', description: 'Spicy chicken taco', price: '$3.99', special: 'yes', category : "Taco" },
+      { name: 'Beef Taco', description: 'Savory beef taco', price: '$4.49', special: 'yes' , category : "Taco"},
     ],
     Burrito: [
-      { name: 'Bean Burrito', description: 'A hearty bean burrito', price: '$6.99', special: 'no' },
-      { name: 'Chicken Burrito', description: 'A flavorful chicken burrito', price: '$7.99', special: 'no' },
+      { name: 'Bean Burrito', description: 'A hearty bean burrito', price: '$6.99', special: 'no' , category : "Burrito"},
+      { name: 'Chicken Burrito', description: 'A flavorful chicken burrito', price: '$7.99', special: 'no' , category : "Burrito"},
     ],
     Drink: [
-      { name: 'Coca Cola', description: 'Refreshing cola drink', price: '$1.99', special: 'no' },
-      { name: 'Orange Juice', description: 'Freshly squeezed orange juice', price: '$2.49', special: 'no' },
+      { name: 'Coca Cola', description: 'Refreshing cola drink', price: '$1.99', special: 'no' , category : "Drink"},
+      { name: 'Orange Juice', description: 'Freshly squeezed orange juice', price: '$2.49', special: 'no' , category : "Drink"},
     ],
     Pizza: [
-      { name: 'Pepperoni Pizza', description: 'Classic pepperoni pizza', price: '$8.99', special: 'no' },
-      { name: 'Margherita Pizza', description: 'Traditional Margherita pizza', price: '$7.99', special: 'no' },
+      { name: 'Pepperoni Pizza', description: 'Classic pepperoni pizza', price: '$8.99', special: 'no' , category : "Pizza"},
+      { name: 'Margherita Pizza', description: 'Traditional Margherita pizza', price: '$7.99', special: 'no' , category : "Pizza"},
     ],
     Donut: [
-      { name: 'Glazed Donut', description: 'Sweet glazed donut', price: '$1.49', special: 'no' },
-      { name: 'Chocolate Donut', description: 'Rich chocolate donut', price: '$1.99', special: 'no' },
+      { name: 'Glazed Donut', description: 'Sweet glazed donut', price: '$1.49', special: 'no' , category : "Donut"},
+      { name: 'Chocolate Donut', description: 'Rich chocolate donut', price: '$1.99', special: 'no' , category : "Donut"},
     ],
     Salad: [
-      { name: 'Caesar Salad', description: 'Crisp Caesar salad', price: '$5.99', special: 'no' },
-      { name: 'Greek Salad', description: 'Fresh Greek salad', price: '$6.49', special: 'no' },
+      { name: 'Caesar Salad', description: 'Crisp Caesar salad', price: '$5.99', special: 'no' , category : "Salad"},
+      { name: 'Greek Salad', description: 'Fresh Greek salad', price: '$6.49', special: 'no' , category : "Salad"},
     ],
     Noodles: [
-      { name: 'Spicy Ramen', description: 'Hot and spicy ramen noodles', price: '$7.99', special: 'no' },
-      { name: 'Pad Thai', description: 'Classic Thai noodle dish', price: '$8.99', special: 'no' },
+      { name: 'Spicy Ramen', description: 'Hot and spicy ramen noodles', price: '$7.99', special: 'no' , category : "Noodles"},
+      { name: 'Pad Thai', description: 'Classic Thai noodle dish', price: '$8.99', special: 'no' , category : "Noodles"},
     ],
     Sandwich: [
-      { name: 'Turkey Sandwich', description: 'Turkey sandwich with lettuce', price: '$5.99', special: 'no' },
-      { name: 'Ham Sandwich', description: 'Ham sandwich with cheese', price: '$5.49', special: 'no' },
+      { name: 'Turkey Sandwich', description: 'Turkey sandwich with lettuce', price: '$5.99', special: 'no' , category : "Sandwich"},
+      { name: 'Ham Sandwich', description: 'Ham sandwich with cheese', price: '$5.49', special: 'no' , category : "Sandwich"},
     ],
     Pasta: [
-      { name: 'Spaghetti Bolognese', description: 'Pasta with meat sauce', price: '$9.99', special: 'no' },
-      { name: 'Penne Alfredo', description: 'Pasta with creamy Alfredo sauce', price: '$8.99', special: 'no' },
+      { name: 'Spaghetti Bolognese', description: 'Pasta with meat sauce', price: '$9.99', special: 'no' , category : "Pasta"},
+      { name: 'Penne Alfredo', description: 'Pasta with creamy Alfredo sauce', price: '$8.99', special: 'no' , category : "Pasta"},
     ],
     IceCream: [
-      { name: 'Vanilla Ice Cream', description: 'Creamy vanilla ice cream', price: '$2.99', special: 'yes' },
-      { name: 'Chocolate Ice Cream', description: 'Rich chocolate ice cream', price: '$2.99', special: 'yes' },
+      { name: 'Vanilla Ice Cream', description: 'Creamy vanilla ice cream', price: '$2.99', special: 'yes' , category : "IceCream"},
+      { name: 'Chocolate Ice Cream', description: 'Rich chocolate ice cream', price: '$2.99', special: 'yes' , category : "IceCream"},
     ],
   };
 
   const offers = [
-    { title: 'Ice Cream Day', description: 'Get your sweet ice cream', offer: '40% off' },
-    { title: 'Burger Fest', description: 'Big Juicy Burgers', offer: 'Buy 1, Get 1 Free!' },
-    { title: 'Taco Special', description: 'Tasty Tacos', offer: 'Buy 2, Get 1 Free!' },
+    { title: 'Ice Cream Day', description: 'Get your sweet ice cream', offer: '40% off', itemCategory: 'IceCream', discount: 40 },
+    { title: 'Burger Fest', description: 'Big Juicy Burgers', offer: '20% off', itemCategory: 'Burger', discount: 20 },
+    { title: 'Taco Special', description: 'Tasty Tacos', offer: '15% off' , itemCategory: 'Taco', discount: 15},
   ];
 
 
@@ -95,6 +95,16 @@ const MenuPage = () => {
 
   const prevOffer = () => {
     setCurrentOfferIndex((currentOfferIndex - 1 + offers.length) % offers.length);
+  };
+
+  //discount function
+  const calculateDiscountedPrice = (item) => {
+    const offer = offers.find(offer => offer.itemCategory === item.category);
+    if (offer && item.special === 'yes') {
+      const discountPrice = parseFloat(item.price.slice(1)) * (1 - offer.discount / 100);
+      return discountPrice.toFixed(2);
+    }
+    return item.price; // Return original price if no discount applies
   };
 
   // for searching
@@ -141,10 +151,13 @@ const MenuPage = () => {
     setOrder(prevOrder => {
       const categoryOrder = prevOrder[category] || [];
       const itemIndex = categoryOrder.findIndex(i => i.name === item.name);
+      const discountedPrice = (item.special === 'yes') ? calculateDiscountedPrice(item) : item.price;
+      //console.log("special", discountedPrice);
       if (itemIndex === -1) {
+        
         return {
           ...prevOrder,
-          [category]: [...categoryOrder, { ...item, quantity: 1 }],
+          [category]: [...categoryOrder, { ...item, quantity: 1, discountedPrice: discountedPrice}],
         };
       } else {
         const updatedItem = { ...categoryOrder[itemIndex], quantity: categoryOrder[itemIndex].quantity + 1 };
@@ -160,7 +173,8 @@ const MenuPage = () => {
     });
   };
 
-  console.log("bur",order);
+  //console.log("bur",order);
+  //console.log("bur2",order.discountPrice);
 
   const removeFromOrder = (category, item) => {
     setOrder(prevOrder => {
@@ -277,7 +291,7 @@ const MenuPage = () => {
                       {item.special === 'yes' ? (
                         <>
                           <span className="line-through mr-2">{item.price}</span>
-                          <span>{`${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
+                          <span>{calculateDiscountedPrice(item)}</span>
                         </>
                       ) : (
                         item.price
@@ -306,7 +320,12 @@ const MenuPage = () => {
 
         {/* Order Summary */}
         <div className="mt-5">
-          <h3 className="text-xl font-bold mb-3">Your Order</h3>
+          <div className='flex justify-between'>
+            <h3 className="text-xl font-bold mb-3">Your Order</h3>
+            <button className='text-xl font-bold mb-3 underline' onClick={goToBasket} >
+              My Basket
+            </button>
+          </div>
           {Object.keys(order).length === 0 ? (
             <p>No items in your order.</p>
           ) : (
@@ -333,7 +352,7 @@ const MenuPage = () => {
                     >
                       Remove
                     </button>
-                    {console.log(order)}
+                    {console.log("order",order)}
                   </div>
                 ))
               ))}

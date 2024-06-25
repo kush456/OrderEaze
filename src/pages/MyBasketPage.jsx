@@ -1,18 +1,39 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const MyBasket = () => {
 
   const location = useLocation();
   const { order } = location.state || { order: {} };
+  
+  const navigate = useNavigate();
 
-  console.log(order);
+  const calculateTotalPrice = () => {
+    let totalPrice = 0;
+
+    Object.keys(order).forEach(category => {
+      order[category].forEach(item => {
+        const itemPrice = (item.special === 'yes') ?
+          parseFloat(item.discountedPrice.slice(1)) * item.quantity :
+          parseFloat(item.price.slice(1)) * item.quantity;
+
+        totalPrice += itemPrice;
+      });
+    });
+
+    return totalPrice.toFixed(2);
+  };
+
+  const goToMenu = () => {
+    navigate('/menu', { state: { order } });
+  };
+  
+  // console.log(order);
   return (
-    <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-lg md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
+    <div className="max-w-lg mx-auto mb-32 p-4 bg-white rounded-lg shadow-lg md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
       <div className="flex items-center justify-between mb-4">
-        <button className="text-gray-700">&larr;</button>
         <h2 className="text-xl font-semibold">My Basket</h2>
-        <button className="text-red-500">Add Items</button>
+        <button className="text-red-500" onClick={goToMenu}>Add Items</button>
       </div>
       <div className="space-y-4">
         {Object.keys(order).map(category => (
@@ -24,7 +45,7 @@ export const MyBasket = () => {
                   {(item.special === "yes") ? 
                   <>
                     <p className="text-gray-400 line-through">{item.price}</p>
-                    <p className="text-red-500 text-lg">{"here discounted price will come"}</p> 
+                    <p className="text-red-500 text-lg">{item.discountedPrice}</p> 
                   </> :
                   <>
                   <p className="text-red-500 text-lg">{item.price}</p> 
@@ -56,8 +77,8 @@ export const MyBasket = () => {
           <p className="text-gray-900 font-semibold">Cash</p>
         </div>
       </div>
-      <div className="mt-6 flex items-center justify-between">
-        <h3 className="text-2xl font-semibold">{/* Total Price */}</h3>
+      <div className="flex items-center justify-around w-11/12 fixed bottom-0 px-4 py-3 my-2 mr-2 bg-white border rounded-lg shadow-lg">
+        <h3 className="text-2xl font-semibold">${calculateTotalPrice()} </h3>
         <button className="px-6 py-3 bg-red-500 text-white rounded-lg">Place Order</button>
       </div>
     </div>
