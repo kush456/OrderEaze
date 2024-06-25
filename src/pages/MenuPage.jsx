@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {Element, scroller } from 'react-scroll';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Basket from '../components/Basket';
 import Profile from '../components/Profile';
 
@@ -159,6 +159,8 @@ const MenuPage = () => {
     });
   };
 
+  console.log("bur",order);
+
   const removeFromOrder = (category, item) => {
     setOrder(prevOrder => {
       const categoryOrder = prevOrder[category] || [];
@@ -191,7 +193,22 @@ const MenuPage = () => {
   };
 
   const initialCategoriesToShow = 8; // to implement more info less info
-  
+
+  const navigate=useNavigate();
+  const serializeOrder = (order) => {
+    const params = new URLSearchParams();
+    Object.keys(order).forEach(category => {
+      order[category].forEach(item => {
+        params.append(`${category}_${item.name}`, item.quantity);
+      });
+    });
+    return params.toString();
+  };
+  const handleBasketClick = () => {
+    const orderQuery = serializeOrder(order);
+    navigate(`/mybasket?${orderQuery}`);
+  };
+
   return (
     
       <div className="p-5">
@@ -203,9 +220,9 @@ const MenuPage = () => {
             <h1 className="text-2xl">Welcome To</h1>
             <h2 className="text-2xl font-bold text-red-500">Desi Tadka</h2>
           </div>
-          <Link className="my-5" to={"/mybasket"}>
-            <Basket/>
-          </Link>
+           <button className="my-5" onClick={handleBasketClick}>
+          <Basket />
+        </button>
         </header>
 
         {/* special offers */}
@@ -300,7 +317,7 @@ const MenuPage = () => {
                       {item.special === 'yes' ? (
                         <>
                           <span className="line-through mr-2">{item.price}</span>
-                          <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
+                          <span>{`${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
                         </>
                       ) : (
                         item.price
@@ -343,7 +360,7 @@ const MenuPage = () => {
                       {item.special === 'yes' ? (
                         <>
                           <span className="line-through mr-2">{item.price}</span>
-                          <span>{`$${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
+                          <span>{`${(parseFloat(item.price.slice(1)) * 0.6).toFixed(2)}`}</span>
                         </>
                       ) : (
                         item.price
