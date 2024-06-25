@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {Element, scroller } from 'react-scroll';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Basket from '../components/Basket';
 import Profile from '../components/Profile';
+import Categories from '../components/Categories';
 
 
 const MenuPage = () => {
@@ -10,21 +11,29 @@ const MenuPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOption, setFilterOption] = useState('none');
   const [order, setOrder] = useState([]);
-  const [showAllCategories, setShowAllCategories] = useState(false);
+  const isInitialMount = useRef(true);
+  const navigate = useNavigate();
 
-  const categories = [
-    { name: 'Burger', icon: '🍔' },
-    { name: 'Taco', icon: '🌮' },
-    { name: 'Burrito', icon: '🌯' },
-    { name: 'Drink', icon: '🥤' },
-    { name: 'Pizza', icon: '🍕' },
-    { name: 'Donut', icon: '🍩' },
-    { name: 'Salad', icon: '🥗' },
-    { name: 'Noodles', icon: '🍜' },
-    { name: 'Sandwich', icon: '🥪' },
-    { name: 'Pasta', icon: '🍝' },
-    { name: 'IceCream', icon: '🍨' },
-  ];
+  //Load order 
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('order');
+    console.log(savedOrder);
+    if (savedOrder) {
+      setOrder(JSON.parse(savedOrder));
+    }
+  }, []);
+
+  //save order
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      console.log("was run");
+      localStorage.setItem('order', JSON.stringify(order));
+    }
+  }, [order]);
+
+  
 
   const foodItems = {
     Burger: [
@@ -79,14 +88,6 @@ const MenuPage = () => {
     { title: 'Taco Special', description: 'Tasty Tacos', offer: 'Buy 2, Get 1 Free!' },
   ];
 
-  // scroll functionality
-  const scrollToCategory = (category) => {
-    scroller.scrollTo(category, {
-      duration: 800,
-      delay: 0,
-      smooth: 'easeInOutQuart'
-    });
-  };
 
   const nextOffer = () => {
     setCurrentOfferIndex((currentOfferIndex + 1) % offers.length);
@@ -192,21 +193,10 @@ const MenuPage = () => {
     });
   };
 
-  const initialCategoriesToShow = 8; // to implement more info less info
+  
 
-  const navigate=useNavigate();
-  const serializeOrder = (order) => {
-    const params = new URLSearchParams();
-    Object.keys(order).forEach(category => {
-      order[category].forEach(item => {
-        params.append(`${category}_${item.name}`, item.quantity);
-      });
-    });
-    return params.toString();
-  };
-  const handleBasketClick = () => {
-    const orderQuery = serializeOrder(order);
-    navigate(`/mybasket?${orderQuery}`);
+  const goToBasket = () => {
+    navigate('/mybasket', { state: { order } });
   };
 
   return (
@@ -220,9 +210,9 @@ const MenuPage = () => {
             <h1 className="text-2xl">Welcome To</h1>
             <h2 className="text-2xl font-bold text-red-500">Desi Tadka</h2>
           </div>
-           <button className="my-5" onClick={handleBasketClick}>
-          <Basket />
-        </button>
+          <button onClick={goToBasket}>
+            <Basket />
+          </button>
         </header>
 
         {/* special offers */}
@@ -267,38 +257,8 @@ const MenuPage = () => {
           </select>
         </div>
 
-
-        {/*category divs*/}
-        <section className="flex flex-wrap justify-around mb-5">
-          {categories.slice(0, showAllCategories ? categories.length : initialCategoriesToShow).map((category, index) => (
-            <div
-              key={category.name}
-              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-              onClick={() => scrollToCategory(category.name)}
-            >
-              <span className="text-2xl">{category.icon}</span>
-              <p>{category.name}</p>
-            </div>
-          ))}
-          {/*more info less info*/}
-          {!showAllCategories ? (
-            <div
-              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-              onClick={() => setShowAllCategories(true)}
-            >
-              <span className="text-2xl">➕</span>
-              <p>More Info</p>
-            </div>
-          ) : (
-            <div
-              className="bg-white-200 p-4 m-2 rounded-lg text-center cursor-pointer w-24 shadow-md shadow-gray border border-white"
-              onClick={() => setShowAllCategories(false)}
-            >
-              <span className="text-2xl">➖</span>
-              <p>Less Info</p>
-            </div>
-          )}
-        </section>
+        {/*category component*/}
+        <Categories/>
 
         
         {/* food items */}

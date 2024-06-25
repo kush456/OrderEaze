@@ -1,30 +1,12 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 export const MyBasket = () => {
+
   const location = useLocation();
+  const { order } = location.state || { order: {} };
 
-  const parseOrderFromParams = (params) => {
-    const order = {};
-    for (const [key, value] of params.entries()) {
-      const [category, itemName] = key.split('_');
-      if (!order[category]) {
-        order[category] = [];
-      }
-      order[category].push({
-        name: itemName,
-        quantity: parseInt(value, 10),
-        // Add other item properties here if necessary
-      });
-    }
-    return order;
-  };
-
-  const memoizedOrder = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return parseOrderFromParams(params);
-  }, [location.search]);
-
+  console.log(order);
   return (
     <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-lg md:max-w-2xl lg:max-w-4xl xl:max-w-6xl">
       <div className="flex items-center justify-between mb-4">
@@ -33,14 +15,22 @@ export const MyBasket = () => {
         <button className="text-red-500">Add Items</button>
       </div>
       <div className="space-y-4">
-        {Object.keys(memoizedOrder).map(category => (
-          memoizedOrder[category].map(item => (
+        {Object.keys(order).map(category => (
+          order[category].map(item => (
             <div key={item.name} className="border p-4 rounded-lg">
               <div className="flex items-center space-x-4 mb-2">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{item.name}</h3>
-                  <p className="text-gray-400 line-through">{/* Original price if applicable */}</p>
-                  <p className="text-red-500 text-lg">{/* Discounted price if applicable */}</p>
+                  {(item.special === "yes") ? 
+                  <>
+                    <p className="text-gray-400 line-through">{item.price}</p>
+                    <p className="text-red-500 text-lg">{"here discounted price will come"}</p> 
+                  </> :
+                  <>
+                  <p className="text-red-500 text-lg">{item.price}</p> 
+                  </>
+                  }
+                  
                 </div>
                 <button className="text-gray-400">&times;</button>
               </div>
