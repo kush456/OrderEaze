@@ -1,15 +1,52 @@
 // src/components/PaymentsPage.jsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PaymentsPage = () => {
   const [selectedPayment, setSelectedPayment] = useState('');
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCardId, setSelectedCardId] = useState(null);
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
+  const isInitialMount = useRef(true);
+  const [cards, setCards] = useState([]); 
+  const navigate = useNavigate();
+
+  const location = useLocation();
+  const { order={} } = location.state || {};
+
+  //Load
+  useEffect(() => {
+    const savedCard = localStorage.getItem('card');
+    const savedPayment = localStorage.getItem('payment');
+    if (savedCard) {
+      setCards(JSON.parse(savedCard));
+      console.log('savedCard',savedCard);
+    }
+    if (savedPayment) {
+      setSelectedPayment(savedPayment);
+      console.log('savedPayment',savedPayment);
+    }
+  }, []);
+
+  //save 
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      //console.log("was run");
+      localStorage.setItem('card', JSON.stringify(cards));
+      localStorage.setItem('payment', JSON.stringify(selectedPayment));//might have to remove stringify here
+    }
+  }, [cards, selectedPayment]);
 
   const handlePaymentSelect = (method) => {
     setSelectedPayment(method);
-    if (method === 'Card') setIsAddingCard(false);
+    if (method === 'Card'){
+      setIsAddingCard(false);
+      setSelectedCard(null);
+    } 
   };
 
   const handleAddCardClick = () => {
@@ -17,14 +54,35 @@ const PaymentsPage = () => {
   };
 
   const handleSaveCardClick = () => {
-    //havent made database yet so not wont save it yet 
+    //havent made database yet so used local storage 
+    const newCard = {
+      number: cardNumber,
+      id: cards.length + 1, // Assigning a unique ID for the card
+    };
+    setCards([...cards, newCard]); // Updating the cards array
     setIsAddingCard(false);
     setCardNumber('');
+  };
+
+  const handleCardSelect = (card) => {
+    setSelectedCard(card);
+    setSelectedCardId(card.id);
   };
 
   const handleCancelClick = () => {
     setIsAddingCard(false);
     setCardNumber('');
+  };
+
+  const goToBasket = () => {
+    if (selectedPayment === 'Card') {
+      // If a card is selected, send the selected card and the selected payment method as state
+      navigate('/mybasket', { state: { order, selectedCard , selectedPayment: selectedPayment } });
+    } else {
+      // If a payment method other than card is selected, send the selected payment method as state
+      navigate('/mybasket', { state: { order, selectedPayment: selectedPayment } });
+    }
+
   };
 
   return (
@@ -68,13 +126,25 @@ const PaymentsPage = () => {
                     + Add New Card
                   </button>
                 )}
+                {cards.length > 0 && ( // Displaying the cards if there are any
+                  <div className="mt-4">
+                    <h3 className="text-lg font-bold mb-2">Cards</h3>
+                    <ul className="space-y-2">
+                      {cards.map((card) => (
+                        <li key={card.id} className={`p-2 border rounded-lg cursor-pointer ${card.id === selectedCardId ? 'bg-red-200' : ''}`} onClick={() => handleCardSelect(card)}>
+                          {card.number}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </li>
         </ul>
         
       </div>
-      <button className="mt-6 bg-red-400 text-white rounded-lg shadow-md p-6 w-full max-w-sm md:max-w-md lg:max-w-lg">Apply</button>
+      <button onClick={goToBasket} className="mt-6 bg-red-400 text-white rounded-lg shadow-md p-6 w-full max-w-sm md:max-w-md lg:max-w-lg">Apply</button>
     </div>
   );
 };
